@@ -59,6 +59,9 @@ BEGIN_MESSAGE_MAP(CprojectGRIMDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_IMAGE_SAVE, &CprojectGRIMDlg::OnBnClickedButtonImageSave)
 	ON_BN_CLICKED(IDC_BUTTON_IMAGE_LOAD, &CprojectGRIMDlg::OnBnClickedButtonImageLoad)
 	ON_BN_CLICKED(IDC_BUTTON_IMAGE_MOVE_RECT, &CprojectGRIMDlg::OnBnClickedButtonImageMoveRect)
+	ON_WM_ERASEBKGND()
+	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BUTTON_ONOFF, &CprojectGRIMDlg::OnBnClickedButtonOnoff)
 END_MESSAGE_MAP()
 
 // CprojectGRIMDlg 메시지 처리기
@@ -88,7 +91,7 @@ BOOL CprojectGRIMDlg::OnInitDialog() {
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다
-
+	initButtons();
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -128,6 +131,16 @@ void CprojectGRIMDlg::OnPaint() {
 HCURSOR CprojectGRIMDlg::OnQueryDragIcon() { return static_cast<HCURSOR>(m_hIcon); }
 
 //--- CUSTOM ---//
+void CprojectGRIMDlg::initButtons() {
+	CRect rectButton(0, 0, 100, 60);
+	GetDlgItem(IDC_BUTTON_ONOFF)->GetWindowRect(&rectButton);
+	//GetDlgItem(IDC_BUTTON_ONOFF)->GetClientRect(&rectButton);
+	m_pBtnOnOff = new CBitmapButton;
+	m_pBtnOnOff->Create(NULL, WS_CHILD | WS_VISIBLE | BS_OWNERDRAW, rectButton, this, IDC_BUTTON_ONOFF);
+	m_pBtnOnOff->LoadBitmaps(IDB_ON, IDB_OFF);
+	m_pBtnOnOff->SizeToContent();
+}
+
 void CprojectGRIMDlg::OnBnClickedButton1() {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	//AfxMessageBox(_T("hellow window"));
@@ -188,21 +201,72 @@ void CprojectGRIMDlg::moveRect() {
 	m_Orect = CRect(0, 0, iWidth, iHeight);
 
 	memset(pOimageBits, 0xff, iWidth * iHeight);
+
 	for(int j = iStartY; j < iStartY + iHeight/10; j++) {
 		for(int i = iStartX; i < iStartX + iWidth/10; i++) {
 			if(validImagePos(i, j)) {
 				pOimageBits[j * iPitch + i] = iColor_Gray;
-
 			}
 		}
 	}
-	iStartX++;
-	iStartY++;
+	drawCircle(pOimageBits, iStartX, iStartY, iRadius, 0xff);
+	drawCircle(pOimageBits, ++iStartX, ++iStartY, iRadius, iColor_Gray);
 	updateDC();
 }
 void CprojectGRIMDlg::OnBnClickedButtonImageMoveRect() {
-	for(int i = 0; i < 100; i++) {
+	for(int i = 0; i < iWidth/2; i++) {
 		moveRect();
-		Sleep(10);
+		Sleep(0.5);
 	}
+}
+bool CprojectGRIMDlg::isInCircle(int _i, int _j, int _centerX, int _centerY, int _radius) {
+	double dDistX = _i - _centerX;
+	double dDistY = _j - _centerY;
+	double dDistPower = dDistX * dDistX + dDistY * dDistY;
+	if(dDistPower < _radius * _radius) {
+		return true;
+	}
+	return false;
+}
+void CprojectGRIMDlg::drawCircle(unsigned char* _imageBit, int _x, int _y, int _radius, int _color) {
+	int iCenterX = _x + _radius;
+	int iCenterY = _y + _radius;
+	int iPitch = m_Oimage.GetPitch();
+	unsigned char* pOimageBits = (unsigned char*)m_Oimage.GetBits();
+	for(int j = _y; j < _y + _radius *2; j++) {
+		for(int i = _x; i < _x + _radius * 2; i++) {
+			if(isInCircle(i, j,iCenterX,iCenterY,_radius)) {
+				pOimageBits[j * iPitch + i] = iColor_Gray+100;
+			}
+		}
+	}
+}
+
+BOOL CprojectGRIMDlg::OnEraseBkgnd(CDC* _pDC) {
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	CPngImage imageBASE;
+	imageBASE.Load(IDB_BASE, nullptr);
+	
+	CDC dc;
+	dc.CreateCompatibleDC(_pDC);
+	CBitmap* pOldBitmap = dc.SelectObject(&imageBASE);
+
+	_pDC->BitBlt(0, 0, 640, 480, &dc, 0, 0, SRCCOPY);
+	dc.SelectObject(pOldBitmap);
+	return TRUE;
+
+	return CDialogEx::OnEraseBkgnd(_pDC);
+}
+void CprojectGRIMDlg::OnDestroy() {
+	CDialogEx::OnDestroy();
+	if(m_pBtnOnOff) { delete m_pBtnOnOff;	}
+}
+void CprojectGRIMDlg::OnBnClickedButtonOnoff() {
+	static bool bOn = false;
+	if(bOn) {
+		m_pBtnOnOff->LoadBitmaps(IDB_ON);
+	} else {
+		m_pBtnOnOff->LoadBitmaps(IDB_OFF);
+	}
+	bOn = !bOn;
 }

@@ -33,15 +33,18 @@ private:
 	CImage m_Oimage;
 	CRect m_Orect;
 	BOOL validImagePos(int _x, int _y) { return m_Orect.PtInRect( CPoint(_x, _y) ); }
+	CBitmapButton* m_pBtnOnOff;
+	void initButtons();
+
+protected:
 
 public:
-
-
 	int m_iNum;
 
 	int iWidth = 640;
 	int iHeight = 480;
 	int iBpp = 8;
+	int iRadius = 10;
 
 	int iColor_Gray = 80;
 
@@ -58,4 +61,9 @@ public:
 		m_Oimage.Draw(OclientDC, 0, 0);
 	}
 	void moveRect();
+	void drawCircle(unsigned char* _imageBit, int _i, int _j, int _radius, int _color);
+	bool isInCircle(int _i, int _j, int _centerX, int _centerY, int _radius);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnDestroy();
+	afx_msg void OnBnClickedButtonOnoff();
 };

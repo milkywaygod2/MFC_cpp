@@ -207,6 +207,12 @@
     <None Include="res\projectGRIM.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="image\off.bmp" />
+    <Image Include="image\on.bmp" />
+    <Image Include="res\bitmap1.bmp" />
+    <Image Include="res\DlgBase.png" />
+    <Image Include="res\off.bmp" />
+    <Image Include="res\on.bmp" />
     <Image Include="res\projectGRIM.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
