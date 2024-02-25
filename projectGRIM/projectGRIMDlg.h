@@ -30,8 +30,8 @@ protected:
 
 //--- CUSTOM ---//
 private:
-	CImage m_Oimage;
 	CRect m_Orect;
+	CImage m_Oimage;
 	BOOL validImagePos(int _x, int _y) { return m_Orect.PtInRect( CPoint(_x, _y) ); }
 	CBitmapButton* m_pBtnOnOff;
 	void initButtons();
@@ -39,6 +39,8 @@ private:
 protected:
 
 public:
+	Cdlgimage* m_pDlgImage;
+	Cdlgimage* m_pDlgImageResult;
 	int m_iNum;
 
 	int iWidth = 640;
@@ -63,7 +65,14 @@ public:
 	void moveRect();
 	void drawCircle(unsigned char* _imageBit, int _i, int _j, int _radius, int _color);
 	bool isInCircle(int _i, int _j, int _centerX, int _centerY, int _radius);
+	void callFunc(int _n);
+
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnDestroy();
 	afx_msg void OnBnClickedButtonOnoff();
+	afx_msg void OnBnClickedButtonDialog2();
+	afx_msg void OnBnClickedButtonLeftRandomPoint();
+	afx_msg void OnBnClickedButtonProcess();
+	afx_msg void OnBnClickedButtonPattern();
+	afx_msg void OnBnClickedButtonGetcenter();
 };

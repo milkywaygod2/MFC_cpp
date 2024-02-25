@@ -8,15 +8,25 @@
 	#define PCH_H
 
 	// 여기에 미리 컴파일하려는 헤더 추가
-	#include "framework.h"
-
+	#include<chrono>
 	#include <iostream>
+	#include <algorithm>
 
+	#include "framework.h"
+	#include "Cdlgimage.h"
+	#include "projectGRIM.h"
+	#include "projectGRIMDlg.h"
+	#include "Cprocess.h"
+	
 	using namespace std;
 
+	#define COLOR_RED	RGB(0xff,0,0)
+	#define COLOR_GREEN	RGB(0,0xff,0)
+	#define COLOR_BLUE	RGB(0,0,0xff)
+
 	#ifdef _DEBUG
-	#define new DEBUG_NEW
-	#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+		#define new DEBUG_NEW
+		#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 	#endif // _DEBUG
 
 #endif //PCH_H

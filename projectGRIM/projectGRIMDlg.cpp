@@ -62,6 +62,11 @@ BEGIN_MESSAGE_MAP(CprojectGRIMDlg, CDialogEx)
 	ON_WM_ERASEBKGND()
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BUTTON_ONOFF, &CprojectGRIMDlg::OnBnClickedButtonOnoff)
+	ON_BN_CLICKED(IDC_BUTTON_DIALOG2, &CprojectGRIMDlg::OnBnClickedButtonDialog2)
+	ON_BN_CLICKED(IDC_BUTTON_LEFT_RANDOM_POINT, &CprojectGRIMDlg::OnBnClickedButtonLeftRandomPoint)
+	ON_BN_CLICKED(IDC_BUTTON_PROCESS, &CprojectGRIMDlg::OnBnClickedButtonProcess)
+	ON_BN_CLICKED(IDC_BUTTON_PATTERN, &CprojectGRIMDlg::OnBnClickedButtonPattern)
+	ON_BN_CLICKED(IDC_BUTTON_GETCENTER, &CprojectGRIMDlg::OnBnClickedButtonGetcenter)
 END_MESSAGE_MAP()
 
 // CprojectGRIMDlg 메시지 처리기
@@ -92,6 +97,18 @@ BOOL CprojectGRIMDlg::OnInitDialog() {
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다
 	initButtons();
+	MoveWindow(0, 0, 1280, 960);
+
+	m_pDlgImage = new Cdlgimage;
+	m_pDlgImage->Create(IDD_Cdlgimage, this);
+	m_pDlgImage->MoveWindow(0, 0, 640, 480);
+	m_pDlgImage->ShowWindow(SW_SHOW);
+
+	m_pDlgImageResult = new Cdlgimage;
+	m_pDlgImageResult->Create(IDD_Cdlgimage, this);
+	m_pDlgImageResult->MoveWindow(640, 0, 640, 480);
+	m_pDlgImageResult->ShowWindow(SW_SHOW);
+
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -241,6 +258,10 @@ void CprojectGRIMDlg::drawCircle(unsigned char* _imageBit, int _x, int _y, int _
 		}
 	}
 }
+void CprojectGRIMDlg::callFunc(int _n) { 
+	cout << _n << endl;
+	int nData = _n;
+}
 
 BOOL CprojectGRIMDlg::OnEraseBkgnd(CDC* _pDC) {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
@@ -259,7 +280,9 @@ BOOL CprojectGRIMDlg::OnEraseBkgnd(CDC* _pDC) {
 }
 void CprojectGRIMDlg::OnDestroy() {
 	CDialogEx::OnDestroy();
-	if(m_pBtnOnOff) { delete m_pBtnOnOff;	}
+	if(m_pBtnOnOff) { delete m_pBtnOnOff; }
+	if(m_pDlgImage) { delete m_pDlgImage; }
+	if(m_pDlgImageResult) { delete m_pDlgImageResult; }
 }
 void CprojectGRIMDlg::OnBnClickedButtonOnoff() {
 	static bool bOn = false;
@@ -270,3 +293,94 @@ void CprojectGRIMDlg::OnBnClickedButtonOnoff() {
 	}
 	bOn = !bOn;
 }
+void CprojectGRIMDlg::OnBnClickedButtonDialog2() {
+	/* Cdlgimage dlg; dlg.DoModal(); */
+	m_pDlgImage->ShowWindow(SW_SHOW);
+}
+void CprojectGRIMDlg::OnBnClickedButtonLeftRandomPoint() {
+	unsigned char* pDlgimage2Bits = (unsigned char*)m_pDlgImage->m_Oimage2.GetBits();
+	int iWidth = m_pDlgImage->m_Oimage2.GetWidth();
+	int iHeight = m_pDlgImage->m_Oimage2.GetHeight();
+	int pitch = m_pDlgImage->m_Oimage2.GetPitch();
+	
+	memset(pDlgimage2Bits, 0, iWidth* iHeight);
+	for(int k = 0; k < MAX_POINT; k++) {
+		int ranX = rand() % iWidth;
+		int ranY = rand() % iHeight;
+		pDlgimage2Bits[ranY * pitch + ranX] = rand()%0xff;
+	}
+	
+	int sumCount = 0; int idx = 0; int threshold = 100;
+	for(int j = 0; j < iHeight; j++) {
+		for(int i = 0; i < iWidth; i++) {
+			if(pDlgimage2Bits[j*pitch+i] > threshold && idx <= MAX_POINT) {
+				m_pDlgImageResult->m_Pdata[idx].x = i;
+				m_pDlgImageResult->m_Pdata[idx].y = j;
+				m_pDlgImageResult->m_iDataCount = ++idx;
+
+				sumCount++;
+				//cout << "(" << i << "," << j << ")" << endl;
+			}
+		}
+	}
+	cout << "total point count : " << sumCount << endl;
+	//std::for_each(std::begin(m_pDlgImageResult->m_Pdata), std::end(m_pDlgImageResult->m_Pdata), {cout << "(" << CPoint.x << "," << CPoint.y << ")"});@?!
+
+	m_pDlgImage->Invalidate();
+	m_pDlgImageResult->Invalidate();
+}
+void CprojectGRIMDlg::OnBnClickedButtonProcess() {
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	auto chronoStart = chrono::system_clock::now();
+
+	Cprocess Oprocess;
+	int ret = Oprocess.getPointInfo(&m_pDlgImage->m_Oimage2);
+
+	auto chronoEnd = chrono::system_clock::now();
+	auto chronoMillisec = chrono::duration_cast<chrono::milliseconds>(chronoEnd - chronoStart);
+
+	cout << ret << "\t" << chronoMillisec.count() << " ms" << endl;
+}
+void CprojectGRIMDlg::OnBnClickedButtonPattern() {
+	unsigned char* pDlgimage2Bits = (unsigned char*)m_pDlgImage->m_Oimage2.GetBits();
+	int iWidth = m_pDlgImage->m_Oimage2.GetWidth();
+	int iHeight = m_pDlgImage->m_Oimage2.GetHeight();
+	int pitch = m_pDlgImage->m_Oimage2.GetPitch();
+
+	memset(pDlgimage2Bits, 0, iWidth * iHeight);
+	CRect rect(100, 200, 150, 400);
+	for(int j = rect.top; j < rect.bottom; j++) {
+		for(int i = rect.left; i < rect.right; i++) {
+			pDlgimage2Bits[j * pitch + i] = rand()%0xff;
+		}
+	}
+	m_pDlgImage->Invalidate();
+}
+
+
+void CprojectGRIMDlg::OnBnClickedButtonGetcenter() {
+	unsigned char* pDlgimage2Bits = (unsigned char*)m_pDlgImage->m_Oimage2.GetBits();
+	int iWidth = m_pDlgImage->m_Oimage2.GetWidth();
+	int iHeight = m_pDlgImage->m_Oimage2.GetHeight();
+	int pitch = m_pDlgImage->m_Oimage2.GetPitch();
+	
+	int threshold = 0x80;
+	CRect rect(0, 0, iWidth, iHeight);
+	int sumX, sumY, count;
+	sumX = sumY = count = 0;
+	for(int j = rect.top; j < rect.bottom; j++) {
+		for(int i = rect.left; i < rect.right; i++) {
+			if(pDlgimage2Bits[j * pitch + i] > threshold){
+				sumX += i;
+				sumY += j;
+				count++;
+			}
+		}
+	}
+		double centerX = (double)sumX / count;
+		double centerY = (double)sumY / count;
+		cout << "center Point(double, double) is... (" << centerX << ",  " << centerY << ")" << endl;
+}
+/*과제
+* edit box, size설정시 랜덤하게 원이 (아마도 1개) 그려짐, 원의 무게중심 알려주고, 가운데는 십자마크, 외각에는 노랗게 원그리기
+*/
