@@ -47,19 +47,45 @@ void Cdlgimage::OnPaint() {
 	// 그리기 메시지에 대해서는 CDialogEx::OnPaint()을(를) 호출하지 마십시오.
 	if(m_Oimage2) { m_Oimage2.Draw(dc, 0, 0); }
 	drawData(&dc);
+	drawExam(&dc);
+	
 }
 void Cdlgimage::drawData(CDC* _pDC) {
 	CPen curPen;
-	curPen.CreatePen(PS_SOLID, 2, COLOR_RED);
+	curPen.CreatePen(PS_SOLID, 1, COLOR_RED);
 	CPen* pOldPen = _pDC->SelectObject(&curPen);
 
 	CRect guideRect(0, 0, 640, 480);
 	for(int i = 0; i < m_iDataCount; i++) {
 		guideRect.SetRect(m_Pdata[i], m_Pdata[i]);
-		guideRect.InflateRect(3, 3);
+		guideRect.InflateRect(5, 5);
 		_pDC->Ellipse(guideRect);
 	}
 	_pDC->SelectObject(pOldPen);
+}
+void Cdlgimage::drawExam(CDC* _pDC) {
+	CPen redPen, ylwPen;
+	ylwPen.CreatePen(PS_SOLID, 1, COLOR_YELLOW);
+	redPen.CreatePen(PS_SOLID, 1, COLOR_RED);
+	
+	CPen* pOldPen = _pDC->SelectObject(&ylwPen);
+	CRect guideRect(0, 0, 640, 480);
+	guideRect.SetRect(m_PcircleEXAM[0], m_PcircleEXAM[0]);
+	guideRect.InflateRect(m_PcircleEXAM[1].x, m_PcircleEXAM[1].y);
+	_pDC->Ellipse(guideRect);
+	_pDC->SelectObject(pOldPen);
+
+	_pDC->SelectObject(&redPen);
+	CRect crossRectH(0, 0, 640, 480);
+	CRect crossRectV(0, 0, 640, 480);
+	crossRectH.SetRect(m_PcircleEXAM[0], m_PcircleEXAM[0]);
+	crossRectV.SetRect(m_PcircleEXAM[0], m_PcircleEXAM[0]);
+	crossRectH.InflateRect(m_PcircleEXAM[1].x, 1);
+	crossRectV.InflateRect(1, m_PcircleEXAM[1].y);
+	_pDC->Rectangle(crossRectH);
+	_pDC->Rectangle(crossRectV);
+	_pDC->SelectObject(pOldPen);
+	
 }
 void Cdlgimage::initImage() {
 	int width = 4096*4;

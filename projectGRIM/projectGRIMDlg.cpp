@@ -40,13 +40,17 @@ END_MESSAGE_MAP()
 /*생성자*/CprojectGRIMDlg::CprojectGRIMDlg(CWnd* pParent /*=nullptr*/) 
 	: CDialogEx(IDD_PROJECTGRIM_DIALOG, pParent), 
 	m_iNum(100)
-{
+	, m_iCircleHeight(10), m_iCircleWidth(10) {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
 void CprojectGRIMDlg::DoDataExchange(CDataExchange* pDX) {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_EDIT_NUM, m_iNum);
+	DDX_Text(pDX, IDC_EDIT_CHEIGHT, m_iCircleHeight);
+	DDV_MinMaxInt(pDX, m_iCircleHeight, 1, INT_MAX);
+	DDX_Text(pDX, IDC_EDIT_CIRCLE_WIDTH, m_iCircleWidth);
+	DDV_MinMaxInt(pDX, m_iCircleWidth, 1, INT_MAX);
 }
 
 BEGIN_MESSAGE_MAP(CprojectGRIMDlg, CDialogEx)
@@ -67,6 +71,9 @@ BEGIN_MESSAGE_MAP(CprojectGRIMDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_PROCESS, &CprojectGRIMDlg::OnBnClickedButtonProcess)
 	ON_BN_CLICKED(IDC_BUTTON_PATTERN, &CprojectGRIMDlg::OnBnClickedButtonPattern)
 	ON_BN_CLICKED(IDC_BUTTON_GETCENTER, &CprojectGRIMDlg::OnBnClickedButtonGetcenter)
+	ON_EN_CHANGE(IDC_EDIT_CIRCLE_WIDTH, &CprojectGRIMDlg::OnEnChangeEditCircleWidth)
+	ON_EN_CHANGE(IDC_EDIT_CHEIGHT, &CprojectGRIMDlg::OnEnChangeEditCheight)
+	ON_BN_CLICKED(IDC_BUTTON_RAND_CIRCLE, &CprojectGRIMDlg::OnBnClickedButtonRandCircle)
 END_MESSAGE_MAP()
 
 // CprojectGRIMDlg 메시지 처리기
@@ -163,6 +170,7 @@ void CprojectGRIMDlg::OnBnClickedButton1() {
 	//AfxMessageBox(_T("hellow window"));
 	UpdateData(true);
 	int iTest = 0;
+
 	for(int i = 0; i < m_iNum; i++) {
 		iTest += i+1;
 		cout << " add : " << i+1 << ", accumulate : " << iTest << endl;
@@ -356,8 +364,6 @@ void CprojectGRIMDlg::OnBnClickedButtonPattern() {
 	}
 	m_pDlgImage->Invalidate();
 }
-
-
 void CprojectGRIMDlg::OnBnClickedButtonGetcenter() {
 	unsigned char* pDlgimage2Bits = (unsigned char*)m_pDlgImage->m_Oimage2.GetBits();
 	int iWidth = m_pDlgImage->m_Oimage2.GetWidth();
@@ -381,6 +387,37 @@ void CprojectGRIMDlg::OnBnClickedButtonGetcenter() {
 		double centerY = (double)sumY / count;
 		cout << "center Point(double, double) is... (" << centerX << ",  " << centerY << ")" << endl;
 }
+
+
+
 /*과제
 * edit box, size설정시 랜덤하게 원이 (아마도 1개) 그려짐, 원의 무게중심 알려주고, 가운데는 십자마크, 외각에는 노랗게 원그리기
 */
+void CprojectGRIMDlg::OnEnChangeEditCircleWidth() {
+
+}
+void CprojectGRIMDlg::OnEnChangeEditCheight() {
+
+}
+void CprojectGRIMDlg::OnBnClickedButtonRandCircle() {
+	unsigned char* pDlgimage2Bits = (unsigned char*)m_pDlgImage->m_Oimage2.GetBits();
+	int iWidth = m_pDlgImage->m_Oimage2.GetWidth();
+	int iHeight = m_pDlgImage->m_Oimage2.GetHeight();
+	int pitch = m_pDlgImage->m_Oimage2.GetPitch();
+	UpdateData(true); //UpdateData(false);
+
+	memset(pDlgimage2Bits, 0xff, iWidth * iHeight); //memset(pDlgimage2Bits, 0, iWidth * iHeight);
+
+	int cirX = rand() % 640;
+	int cirY = rand() % 480;
+	//pDlgimage2Bits[cirY * pitch + cirX] = 0xff;
+	m_pDlgImageResult->m_PcircleEXAM[0].x = cirX;
+	m_pDlgImageResult->m_PcircleEXAM[0].y = cirY;
+	m_pDlgImageResult->m_PcircleEXAM[1].x = m_iCircleWidth;
+	m_pDlgImageResult->m_PcircleEXAM[1].y = m_iCircleHeight;
+
+	cout << "(" << cirX << "," << cirY << ")" << endl << "과제목표 : edit box로 size설정시 랜덤하게 원 생성(아마도 1개), 원의 무게중심 알려주고, 가운데는 십자마크, 외각에는 노랗게 원그리기"<<endl<<endl;
+
+	m_pDlgImage->Invalidate();
+	m_pDlgImageResult->Invalidate();
+}

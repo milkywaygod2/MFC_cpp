@@ -27,11 +27,13 @@ protected:
 //--- CUSTOM ---//
 private:
 	void drawData(CDC* _pDC);
+	void drawExam(CDC* _pDC);
 public:
 	CWnd* m_pParent; //CprojectGRIMDlg* m_pParent;
 	CImage m_Oimage2;
 	int m_iDataCount = 0;
 	CPoint m_Pdata[MAX_POINT];
+	CPoint m_PcircleEXAM[2];
 	afx_msg void OnBnClickedOtherdlgPush();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();

@@ -42,6 +42,8 @@ public:
 	Cdlgimage* m_pDlgImage;
 	Cdlgimage* m_pDlgImageResult;
 	int m_iNum;
+	int m_iCircleHeight;
+	int m_iCircleWidth;
 
 	int iWidth = 640;
 	int iHeight = 480;
@@ -49,6 +51,10 @@ public:
 	int iRadius = 10;
 
 	int iColor_Gray = 80;
+
+
+	int cirX = rand() % iWidth;
+	int cirY = rand() % iHeight;
 
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnEnChangeEditNum();
@@ -75,4 +81,8 @@ public:
 	afx_msg void OnBnClickedButtonProcess();
 	afx_msg void OnBnClickedButtonPattern();
 	afx_msg void OnBnClickedButtonGetcenter();
+
+	afx_msg void OnEnChangeEditCircleWidth();
+	afx_msg void OnEnChangeEditCheight();
+	afx_msg void OnBnClickedButtonRandCircle();
 };
