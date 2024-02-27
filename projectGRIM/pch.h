@@ -11,6 +11,7 @@
 	#include<chrono>
 	#include <iostream>
 	#include <algorithm>
+	#include <thread>
 
 	#include "framework.h"
 	#include "Cdlgimage.h"
@@ -26,6 +27,7 @@
 	#define COLOR_GREEN		RGB(0,0xff,0)
 	#define COLOR_BLUE		RGB(0,0,0xff)
 	#define COLOR_WHITE		RGB(0xff,0xff,0xff)
+
 
 	#ifdef _DEBUG
 		#define new DEBUG_NEW

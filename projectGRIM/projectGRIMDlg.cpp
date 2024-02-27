@@ -74,6 +74,7 @@ BEGIN_MESSAGE_MAP(CprojectGRIMDlg, CDialogEx)
 	ON_EN_CHANGE(IDC_EDIT_CIRCLE_WIDTH, &CprojectGRIMDlg::OnEnChangeEditCircleWidth)
 	ON_EN_CHANGE(IDC_EDIT_CHEIGHT, &CprojectGRIMDlg::OnEnChangeEditCheight)
 	ON_BN_CLICKED(IDC_BUTTON_RAND_CIRCLE, &CprojectGRIMDlg::OnBnClickedButtonRandCircle)
+	ON_BN_CLICKED(IDC_BUTTON_PROCESSTHREAD, &CprojectGRIMDlg::OnBnClickedButtonProcessthread)
 END_MESSAGE_MAP()
 
 // CprojectGRIMDlg 메시지 처리기
@@ -318,7 +319,7 @@ void CprojectGRIMDlg::OnBnClickedButtonLeftRandomPoint() {
 		pDlgimage2Bits[ranY * pitch + ranX] = rand()%0xff;
 	}
 	
-	int sumCount = 0; int idx = 0; int threshold = 100;
+	int sumCount = 0; int idx = 0; int threshold = 0;
 	for(int j = 0; j < iHeight; j++) {
 		for(int i = 0; i < iWidth; i++) {
 			if(pDlgimage2Bits[j*pitch+i] > threshold && idx <= MAX_POINT) {
@@ -347,7 +348,7 @@ void CprojectGRIMDlg::OnBnClickedButtonProcess() {
 	auto chronoEnd = chrono::system_clock::now();
 	auto chronoMillisec = chrono::duration_cast<chrono::milliseconds>(chronoEnd - chronoStart);
 
-	cout << ret << "\t" << chronoMillisec.count() << " ms" << endl;
+	cout << ret << "\t" << chronoMillisec.count() << " ms" << endl << endl;
 }
 void CprojectGRIMDlg::OnBnClickedButtonPattern() {
 	unsigned char* pDlgimage2Bits = (unsigned char*)m_pDlgImage->m_Oimage2.GetBits();
@@ -388,8 +389,6 @@ void CprojectGRIMDlg::OnBnClickedButtonGetcenter() {
 		cout << "center Point(double, double) is... (" << centerX << ",  " << centerY << ")" << endl;
 }
 
-
-
 /*과제
 * edit box, size설정시 랜덤하게 원이 (아마도 1개) 그려짐, 원의 무게중심 알려주고, 가운데는 십자마크, 외각에는 노랗게 원그리기
 */
@@ -420,4 +419,52 @@ void CprojectGRIMDlg::OnBnClickedButtonRandCircle() {
 
 	m_pDlgImage->Invalidate();
 	m_pDlgImageResult->Invalidate();
+}
+
+//Extra : Thread
+void processThread(CWnd* _pParent, CRect _rect, int* _pPointsNumThread) {	//전역함수
+	CprojectGRIMDlg* pWnd = (CprojectGRIMDlg*)_pParent;
+	*_pPointsNumThread = pWnd->processImage(_rect);
+}
+int CprojectGRIMDlg::processImage(CRect _rect) {
+	auto chronoStart = chrono::system_clock::now();
+
+	Cprocess process;
+	int detectedPoints = process.getPointInfo(&m_pDlgImage->m_Oimage2, 0, _rect);
+
+	auto chronoEnd = chrono::system_clock::now();
+	auto chronoMillisec = chrono::duration_cast<chrono::milliseconds>(chronoEnd - chronoStart);
+	cout << "Process Time by eachThread" << "\t" << chronoMillisec.count() << " ms" << endl;
+
+	return detectedPoints;
+}
+void CprojectGRIMDlg::OnBnClickedButtonProcessthread() {
+	auto chronoStart = chrono::system_clock::now();
+
+	int camNum = 4; int camSize = 4096;
+	int imageSize = camSize * camNum;
+	CRect rectImage(0, 0, imageSize, imageSize);
+	CRect rectDiv[4];
+	for(int k = 0; k < camNum; k++) {
+		rectDiv[k] = rectImage;
+		rectDiv[k].OffsetRect(imageSize * (k % 2), imageSize * int(k / 2));
+	}
+
+	int pointsNumThread[4];
+	thread _thread0(processThread, this, rectDiv[0], &pointsNumThread[0]);
+	thread _thread1(processThread, this, rectDiv[1], &pointsNumThread[1]);
+	thread _thread2(processThread, this, rectDiv[2], &pointsNumThread[2]);
+	thread _thread3(processThread, this, rectDiv[3], &pointsNumThread[3]);
+	_thread0.join();//_thread0.detach();
+	_thread1.join();//_thread1.detach();
+	_thread2.join();//_thread2.detach();
+	_thread3.join();//_thread3.detach();
+
+	int pointsSum = 0;
+	for(int i = 0; i < 4; i++) { pointsSum += pointsNumThread[i]; }
+
+	auto chronoEnd = chrono::system_clock::now();
+	auto chronoMillisec = chrono::duration_cast<chrono::milliseconds>(chronoEnd - chronoStart);
+	cout << "Count Points by 4Thread" << "\t" << pointsSum << endl;
+	cout << "Process Time by 4Thread" << "\t" << chronoMillisec.count() << " ms" << endl << endl;
 }

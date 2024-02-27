@@ -12,6 +12,7 @@ private:
 
 public:
 	int getPointInfo(CImage* _pImage, int _iThreshold = 100);
+	int getPointInfo(CImage* _pImage, int _iThreshold, CRect _rect);
 };
 
 

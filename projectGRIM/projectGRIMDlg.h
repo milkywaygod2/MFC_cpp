@@ -72,6 +72,7 @@ public:
 	void drawCircle(unsigned char* _imageBit, int _i, int _j, int _radius, int _color);
 	bool isInCircle(int _i, int _j, int _centerX, int _centerY, int _radius);
 	void callFunc(int _n);
+	int processImage(CRect _rect);
 
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnDestroy();
@@ -85,4 +86,5 @@ public:
 	afx_msg void OnEnChangeEditCircleWidth();
 	afx_msg void OnEnChangeEditCheight();
 	afx_msg void OnBnClickedButtonRandCircle();
+	afx_msg void OnBnClickedButtonProcessthread();
 };

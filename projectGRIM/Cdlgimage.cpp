@@ -45,7 +45,9 @@ BOOL Cdlgimage::OnInitDialog() {
 void Cdlgimage::OnPaint() {
 	CPaintDC dc(this); // device context for painting
 	// 그리기 메시지에 대해서는 CDialogEx::OnPaint()을(를) 호출하지 마십시오.
+
 	if(m_Oimage2) { m_Oimage2.Draw(dc, 0, 0); }
+
 	drawData(&dc);
 	drawExam(&dc);
 	
@@ -88,8 +90,8 @@ void Cdlgimage::drawExam(CDC* _pDC) {
 	
 }
 void Cdlgimage::initImage() {
-	int width = 4096*4;
-	int height = 4096*4;
+	int width = 4096*8;
+	int height = 4096*8;
 	int bpp = 8;
 	m_Oimage2.Create(width, -height, bpp);
 	if(bpp == 8) {
